@@ -1,4 +1,7 @@
-\<img src="/shared/src/commonMain/composeResources/drawable/aiOrka-icon.svg" width="48" height="48" valign="middle"\> aiOrka (aiOrka.org)
+# <img src="shared/src/commonMain/composeResources/drawable/aiOrka-icon.png" height="48" valign="middle" /> aiOrka 
+
+[aiOrka.org](https://aiOrka.org)
+
 
 **The Orchestrator for Cross-Platform AI.**  
 aiOrka is a high-performance Kotlin Multiplatform (KMP) library that acts as an intelligent, policy-driven broker between your application's **Intent** and the world's **AI Providers**.  
