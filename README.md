@@ -8,7 +8,7 @@ aiOrka is a high-performance Kotlin Multiplatform (KMP) library that acts as an 
 
 In an era of fluctuating model prices and frequent provider "brownouts," aiOrka provides the infrastructure to ensure your app remains resilient, cost-effective, and always-online.
 
-## **🌊 Why aiOrka?**
+## Why aiOrka?
 
 Most AI integrations are hardcoded to a specific model. When that model is slow, expensive, or down, your app fails. aiOrka introduces a **Selection Policy** layer that decouples your business logic from the underlying infrastructure.
 
@@ -17,7 +17,7 @@ Most AI integrations are hardcoded to a specific model. When that model is slow,
 * **Economics:** Real-time "Least-Cost" routing saves up to 70% on inference costs by utilizing local or cheaper cloud models when quality thresholds are met.  
 * **Standardization:** Built-in support for the **Model Context Protocol (MCP)** for universal tool and data access.
 
-## **🛠️ Core Concepts**
+## Core Concepts
 
 ### **1\. The Intent-Based Model**
 
@@ -32,9 +32,9 @@ Every request goes through the **Orka Selection Engine**:
 3. **Validation (The Heartbeat):** Checks provider health and credentials before making the call.  
 4. **Optimization:** Runs a scoring algorithm to pick the winner based on **Cost**, **Latency**, or **Quality**.
 
-## **📦 Implementation Guide**
+## Implementation Guide
 
-### **Installation (KMP)**
+### Installation (KMP)
 ```
 // build.gradle.kts  
 commonMain.dependencies {  
@@ -42,7 +42,7 @@ commonMain.dependencies {
 }
 ```
 
-### **Basic Usage**
+### Basic Usage
 ```
 val orka \= AiOrka.initialize(configPath \= "aiOrka.yaml")
 

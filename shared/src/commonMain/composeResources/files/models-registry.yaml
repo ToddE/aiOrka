@@ -89,7 +89,7 @@ models:
     cost_per_1k: 0.030
     scores: { logic: 0.99, speed: 0.35 }
 
-  "claude-4.5-opus":
+  "claude-4.7-opus":
     type: "cloud"
     capabilities: ["creative-reasoning", "nuance", "long-context", "research"]
     context_window: 1000000
@@ -118,7 +118,7 @@ models:
     cost_per_1k: 0.0025
     scores: { logic: 0.94, speed: 0.80 }
 
-  "claude-4.5-sonnet":
+  "claude-4.6-sonnet":
     type: "cloud"
     capabilities: ["agentic-coding", "mcp-native", "human-like-writing"]
     context_window: 1000000

@@ -1,2 +1,82 @@
+# =============================================================================
+# aiOrka — .gitignore
+# Kotlin Multiplatform (Android · iOS · JVM · JS · Native)
+# =============================================================================
+
+# --- Gradle build outputs ---
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# --- IDE ---
+.idea/
+*.iml
+*.ipr
+*.iws
+.fleet/
+.vscode/
+*.suo
+*.user
+
+# --- Android ---
+androidApp/local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+local.properties
+
+# --- iOS / Xcode ---
+iosApp/*.xcworkspace/
+iosApp/Pods/
+iosApp/DerivedData/
+iosApp/.build/
+*.xcuserstate
+xcuserdata/
+*.xccheckout
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# --- Kotlin/Native build artifacts ---
+*.klib
+*.kexe
+*.bc
+*.dSYM/
+
+# --- Compose Multiplatform generated resources ---
+# The Res class is generated at compile time; don't track it
+**/generated/commonMain/
+**/generated/kotlin/
+shared/src/commonMain/kotlin/org/aiorka/generated/
+
+# --- Credentials & secrets — NEVER commit these ---
+*.env
+.env
+.env.*
+!.env.example
+aiOrka.yaml.local
+secrets/
+*.keystore
+*.jks
+google-services.json
+GoogleService-Info.plist
+
+# --- OS artifacts ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# --- Docs excluded from version control ---
 docs/Implementation.md
 docs/Prompt.md
