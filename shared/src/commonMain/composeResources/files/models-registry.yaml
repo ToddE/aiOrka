@@ -1,3 +1,4 @@
+# models-registry.yaml
 # aiOrka Global Model Registry
 # This file tracks capabilities, context limits, and pricing for the top 30+ models.
 # Values are benchmarks for SelectionPolicy optimization (Cost/Latency/Quality).
