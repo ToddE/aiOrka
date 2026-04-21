@@ -1,0 +1,105 @@
+# aiOrka Application Configuration (Enterprise Comprehensive)
+# This file defines your local provider fleet and application-specific overrides.
+
+# 0. Global Monitoring & Heartbeat
+# Proactively monitors provider health to ensure the orchestrator always routes to "live" nodes.
+monitoring:
+  heartbeat:
+    enabled: true
+    interval_ms: 300000   # Ping providers every 5 minutes
+    timeout_ms: 3000      # Mark as 'Slow' if response exceeds 3s
+    failure_threshold: 2  # Evict from 'Active' pool after 2 consecutive failures
+    minimal_prompt: "."   # Single token prompt (approx. 1-2 tokens total overhead)
+  telemetry:
+    enabled: true
+    sample_rate: 1.0      # Record 100% of request latencies for "Fastest" strategy
+
+# 1. Global Reliability Defaults
+defaults:
+  retry:
+    max_attempts: 3
+    initial_backoff_ms: 500
+    max_backoff_ms: 5000
+    strategy: "exponential"
+  caching:
+    enabled: true
+    ttl_ms: 3600000       # 1 hour cache for identical prompts (if policy allows)
+
+# 2. Infrastructure Fleet
+providers:
+  local-qwen:
+    type: "ollama"
+    model_ref: "qwen3.5:9b"
+    endpoint: "http://localhost:11434"
+    config:
+      num_ctx: 32768
+  
+  local-deepseek:
+    type: "ollama"
+    model_ref: "deepseek-r1-distill-llama-8b"
+    endpoint: "http://localhost:11434"
+    description: "Local reasoning specialist."
+
+  google-flash:
+    type: "gemini"
+    model_ref: "gemini-3.1-flash"
+    api_key_env: "GEMINI_API_KEY"
+    timeout_ms: 5000
+
+  anthropic-sonnet:
+    type: "anthropic"
+    model_ref: "claude-4.5-sonnet"
+    api_key_env: "ANTHROPIC_API_KEY"
+
+  deepseek-cloud:
+    type: "deepseek"
+    model_ref: "deepseek-v4"
+    api_key_env: "DEEPSEEK_API_KEY"
+
+  openai-o1:
+    type: "openai"
+    model_ref: "o1"
+    api_key_env: "OPENAI_API_KEY"
+
+# 3. Application Policies
+policies:
+  # --- OVERRIDES: Redefining Standard Library Policies ---
+  "fast-chat":
+    description: "Internal company chat: Tries local Qwen first, then Google Flash."
+    strategy: "least-cost"
+    selection: ["local-qwen", "google-flash"]
+
+  "apex-logic":
+    description: "High-intelligence routing: DeepSeek cloud -> OpenAI o1 fallback."
+    strategy: "quality"
+    requirements:
+      features: ["reasoning", "chain-of-thought"]
+    selection: ["deepseek-cloud", "openai-o1"]
+
+  # --- SUPPLEMENTS: Custom Project-Specific Intents ---
+  "code-reviewer":
+    description: "Strict policy for PR analysis. Requires high logic and tool support."
+    strategy: "quality"
+    requirements:
+      features: ["complex-coding", "tools"]
+      min_context: 32768
+    selection: ["anthropic-sonnet", "deepseek-cloud", "local-deepseek"]
+    retry_override:
+      max_attempts: 5 # More retries for mission-critical code analysis
+
+  "legal-discovery":
+    description: "Confidential document processing. Strictly local-only."
+    strategy: "quality"
+    requirements:
+      connectivity: "local-only"
+      min_context: 65536
+    selection: ["local-deepseek"]
+    caching:
+      enabled: false # Never cache sensitive legal data
+
+  "budget-classifier":
+    description: "Massive scale data tagging. Extreme cost optimization."
+    strategy: "least-cost"
+    requirements:
+      features: ["json_mode"]
+    selection: ["local-qwen", "google-flash"]

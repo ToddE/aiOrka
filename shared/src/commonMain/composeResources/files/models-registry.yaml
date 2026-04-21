@@ -1,0 +1,225 @@
+# aiOrka Global Model Registry
+# This file tracks capabilities, context limits, and pricing for the top 30+ models.
+# Values are benchmarks for SelectionPolicy optimization (Cost/Latency/Quality).
+# Last Updated: 2026-04-21
+
+models:
+  # --- LOCAL & EDGE FLEET (Ollama / Llama.cpp / MLX) ---
+  # These models run on-device with zero inference cost. Benchmarks based on 32GB-64GB systems.
+
+  "qwen3.5:27b":
+    type: "local"
+    capabilities: ["reasoning", "json_mode", "tools", "coding-expert"]
+    context_window: 131072
+    cost_per_1k: 0.00
+    scores: { logic: 0.91, speed: 0.45 } # High-end local reasoning
+
+  "gemma-4:31b":
+    type: "local"
+    capabilities: ["multimodal", "reasoning", "tools", "long-context"]
+    context_window: 256000
+    cost_per_1k: 0.00
+    scores: { logic: 0.89, speed: 0.40 } # Google's dense flagship for local hardware
+
+  "mistral-small-3.1:24b":
+    type: "local"
+    capabilities: ["fast-reasoning", "json_mode", "tools", "low-latency"]
+    context_window: 128000
+    cost_per_1k: 0.00
+    scores: { logic: 0.85, speed: 0.75 } # Community favorite for agentic workflows
+
+  "qwen3.5:9b":
+    type: "local"
+    capabilities: ["fast-chat", "reliable-json", "vision"]
+    context_window: 128000
+    cost_per_1k: 0.00
+    scores: { logic: 0.78, speed: 0.92 } # Exceptional speed-to-logic ratio
+
+  "mistral-nemo-12b":
+    type: "local"
+    capabilities: ["reasoning", "tools", "multilingual", "rag-expert"]
+    context_window: 131072
+    cost_per_1k: 0.00
+    scores: { logic: 0.76, speed: 0.85 } # Precision tool-calling
+
+  "gemma-4-e4b":
+    type: "local"
+    capabilities: ["on-device-assistant", "low-vram", "audio-native"]
+    context_window: 128000
+    cost_per_1k: 0.00
+    scores: { logic: 0.65, speed: 0.98 } # Optimized for entry-level laptops/phones
+
+  "llama-3.2:3b":
+    type: "local"
+    capabilities: ["fast-text", "summarization", "mobile-optimized"]
+    context_window: 128000
+    cost_per_1k: 0.00
+    scores: { logic: 0.45, speed: 0.98 } # Standard mobile-tier baseline
+
+  "deepseek-r1-distill-llama-8b":
+    type: "local"
+    capabilities: ["chain-of-thought", "math", "reasoning"]
+    context_window: 128000
+    cost_per_1k: 0.00
+    scores: { logic: 0.82, speed: 0.80 } # Reasoning "thinking" model for 16GB hardware
+
+  "phi-4-mini:3.8b":
+    type: "local"
+    capabilities: ["logic", "coding", "cpu-optimized"]
+    context_window: 128000
+    cost_per_1k: 0.00
+    scores: { logic: 0.72, speed: 0.95 } # Best logic for pure CPU systems
+
+  "smollm-3:1.7b":
+    type: "local"
+    capabilities: ["embedded-logic", "fast-summarization"]
+    context_window: 8192
+    cost_per_1k: 0.00
+    scores: { logic: 0.35, speed: 0.99 } # For IoT and micro-background tasks
+
+  # --- GLOBAL CLOUD FLEET (Proprietary / API) ---
+  # Tiered by logic and cost. Pricing represents standard 1k token blended rates.
+
+  # Frontier Reasoning (Stage 5 'Dragons' Specialists)
+  "gpt-5.4-pro":
+    type: "cloud"
+    capabilities: ["apex-logic", "science", "complex-coding", "agentic-autonomy"]
+    context_window: 256000
+    cost_per_1k: 0.030
+    scores: { logic: 0.99, speed: 0.35 }
+
+  "claude-4.5-opus":
+    type: "cloud"
+    capabilities: ["creative-reasoning", "nuance", "long-context", "research"]
+    context_window: 1000000
+    cost_per_1k: 0.015
+    scores: { logic: 0.98, speed: 0.45 }
+
+  "gemini-3.1-pro":
+    type: "cloud"
+    capabilities: ["massive-context", "multimodal-reasoning", "research-citations"]
+    context_window: 2000000
+    cost_per_1k: 0.004
+    scores: { logic: 0.96, speed: 0.60 }
+
+  "deepseek-r1":
+    type: "cloud"
+    capabilities: ["chain-of-thought", "verifiable-logic", "math-olympiad"]
+    context_window: 128000
+    cost_per_1k: 0.002
+    scores: { logic: 0.97, speed: 0.25 }
+
+  # Performance All-Rounders (Stage 2-4 Workflow Workhorses)
+  "gpt-5.4":
+    type: "cloud"
+    capabilities: ["balanced-logic", "vision", "tool-orchestration"]
+    context_window: 128000
+    cost_per_1k: 0.0025
+    scores: { logic: 0.94, speed: 0.80 }
+
+  "claude-4.5-sonnet":
+    type: "cloud"
+    capabilities: ["agentic-coding", "mcp-native", "human-like-writing"]
+    context_window: 1000000
+    cost_per_1k: 0.003
+    scores: { logic: 0.95, speed: 0.75 }
+
+  "grok-4.2-beta":
+    type: "cloud"
+    capabilities: ["real-time-search", "coding", "extreme-logic"]
+    context_window: 2000000
+    cost_per_1k: 0.002
+    scores: { logic: 0.94, speed: 0.85 }
+
+  "llama-4-scout":
+    type: "cloud"
+    capabilities: ["long-document-processing", "rag-optimization"]
+    context_window: 10000000
+    cost_per_1k: 0.001
+    scores: { logic: 0.88, speed: 0.70 }
+
+  "deepseek-v4":
+    type: "cloud"
+    capabilities: ["coding", "structured-json", "high-logic-value"]
+    context_window: 1000000
+    cost_per_1k: 0.0003
+    scores: { logic: 0.92, speed: 0.80 }
+
+  "mistral-large-3.1":
+    type: "cloud"
+    capabilities: ["multilingual", "complex-logic", "enterprise-rag"]
+    context_window: 131072
+    cost_per_1k: 0.002
+    scores: { logic: 0.91, speed: 0.72 }
+
+  # High-Velocity / Low-Cost (Stage 1 & Routing Tasks)
+  "gemini-3.1-flash":
+    type: "cloud"
+    capabilities: ["extreme-speed", "vision", "summarization"]
+    context_window: 1000000
+    cost_per_1k: 0.0001
+    scores: { logic: 0.82, speed: 0.96 }
+
+  "gpt-5.4-mini":
+    type: "cloud"
+    capabilities: ["json_mode", "fast-chat", "lightweight-tools"]
+    context_window: 128000
+    cost_per_1k: 0.00015
+    scores: { logic: 0.84, speed: 0.94 }
+
+  "claude-4.5-haiku":
+    type: "cloud"
+    capabilities: ["low-latency-coding", "classification"]
+    context_window: 200000
+    cost_per_1k: 0.00025
+    scores: { logic: 0.81, speed: 0.98 }
+
+  "minimax-01-turbo":
+    type: "cloud"
+    capabilities: ["speed-optimized", "long-context-retrieval"]
+    context_window: 1000000
+    cost_per_1k: 0.0001
+    scores: { logic: 0.78, speed: 0.99 }
+
+  "deepseek-v3.2":
+    type: "cloud"
+    capabilities: ["fast-reasoning", "general-chat", "structured-extraction"]
+    context_window: 128000
+    cost_per_1k: 0.00014
+    scores: { logic: 0.84, speed: 0.90 }
+
+  "gemini-3.1-flash-lite":
+    type: "cloud"
+    capabilities: ["routing", "simple-classification", "extreme-velocity"]
+    context_window: 1000000
+    cost_per_1k: 0.00005
+    scores: { logic: 0.70, speed: 0.99 }
+
+  # Specialists & Niche
+  "sonar-pro-24":
+    type: "cloud"
+    capabilities: ["web-search", "citation-validation", "real-time-news"]
+    context_window: 64000
+    cost_per_1k: 0.001
+    scores: { logic: 0.80, speed: 0.80 }
+
+  "kimi-k2.5-thinking":
+    type: "cloud"
+    capabilities: ["long-reasoning", "agentic-automation"]
+    context_window: 262144
+    cost_per_1k: 0.0006
+    scores: { logic: 0.88, speed: 0.50 }
+
+  "glm-5.1-pro":
+    type: "cloud"
+    capabilities: ["bilingual-logic", "agentic-coding"]
+    context_window: 128000
+    cost_per_1k: 0.0014
+    scores: { logic: 0.90, speed: 0.82 }
+
+  "mi-mo-v2-pro":
+    type: "cloud"
+    capabilities: ["mobile-ecosystem-logic", "smart-home-control"]
+    context_window: 1000000
+    cost_per_1k: 0.001
+    scores: { logic: 0.81, speed: 0.88 }

@@ -1,0 +1,96 @@
+# aiOrka Default Policies
+#
+# CONFIGURATION HIERARCHY:
+# 1. Application-defined policies (e.g., 'aiOrka.yaml' or app-level 'policies.yaml')
+# 2. Library-bundled 'policies.yaml' (This file - Default/Fallback)
+#
+# MERGE LOGIC:
+# - Policies with unique names are added to the active routing table.
+# - If a user defines a policy with the same name as a standard one, 
+#   the user's version COMPLETELY REPLACES the library's version.
+
+policies:
+  # --- CONVERSATIONAL & LOGIC ---
+
+  "fast-chat":
+    description: "Optimized for low-latency, conversational interactions using high-speed flash models."
+    strategy: "fastest"
+    requirements:
+      min_context: 4096
+    selection: ["gemini-3.1-flash", "gpt-5.4-mini", "llama-3.2:3b"]
+
+  "apex-logic":
+    description: "Optimized for high-reasoning, chain-of-thought, and complex logical extraction."
+    strategy: "quality"
+    requirements:
+      features: ["reasoning", "chain-of-thought"]
+      min_context: 32768
+    selection: ["o1", "deepseek-r1", "claude-4.5-opus"]
+
+  # --- DATA & STRUCTURE ---
+
+  "structured-extraction":
+    description: "Optimized for valid JSON schema adherence at the lowest possible cost."
+    strategy: "least-cost"
+    requirements:
+      features: ["json_mode"]
+    selection: ["gpt-5.4-mini", "gemini-3.1-flash-lite", "qwen3.5:9b"]
+
+  "data-sifter":
+    description: "Designed for high-volume classification and data cleaning tasks at extreme scale."
+    strategy: "least-cost"
+    requirements:
+      features: ["json_mode"]
+    selection: ["gemini-3.1-flash-lite", "minimax-01-turbo", "smollm-3:1.7b"]
+
+  # --- MULTIMODAL & VISION ---
+
+  "visual-analysis":
+    description: "Optimized for image understanding, OCR, and document layout analysis."
+    strategy: "quality"
+    requirements:
+      features: ["vision"]
+    selection: ["gemini-3.1-flash", "gpt-5.4", "pixtral-large"]
+
+  # --- DEVELOPMENT & TOOLS ---
+
+  "coding-assistant":
+    description: "Optimized for agentic coding tasks with full tool and MCP support."
+    strategy: "quality"
+    requirements:
+      features: ["tools", "complex-coding"]
+    selection: ["claude-4.5-sonnet", "deepseek-v4", "qwen3.5:27b"]
+
+  # --- RESEARCH & CONTEXT ---
+
+  "real-time-research":
+    description: "Uses web-search enabled models for real-time information retrieval and citation-backed answers."
+    strategy: "fastest"
+    requirements:
+      features: ["web-search"]
+    selection: ["sonar-pro-24", "grok-4.2-beta", "gemini-3.1-flash"]
+
+  "massive-context":
+    description: "For analyzing very long documents, entire codebases, or multi-hour video/audio files."
+    strategy: "quality"
+    requirements:
+      min_context: 1000000
+    selection: ["gemini-3.1-pro", "claude-4.5-sonnet", "llama-4-scout"]
+
+  # --- CREATIVE & CONTENT ---
+
+  "creative-writing":
+    description: "Prioritizes linguistic nuance, storytelling ability, and creative flair over pure logical rigidness."
+    strategy: "quality"
+    requirements:
+      features: ["nuance"]
+    selection: ["claude-4.5-opus", "gpt-5.4", "mistral-large-3.1"]
+
+  # --- SECURITY & PRIVACY ---
+
+  "local-only":
+    description: "Strictly limits inference to local providers to prevent data exfiltration and ensure privacy."
+    strategy: "least-cost"
+    requirements:
+      connectivity: "local-only"
+    selection: ["qwen3.5:27b", "mistral-small-3.1:24b", "llama-3.2:3b"]
