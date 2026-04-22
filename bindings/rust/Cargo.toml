@@ -1,0 +1,18 @@
+[package]
+name = "aiorka"
+version = "0.1.0"
+edition = "2021"
+description = "Policy-driven AI orchestration — Rust bindings for the aiOrka native library"
+license = "Apache-2.0"
+keywords = ["ai", "llm", "orchestration", "anthropic", "openai"]
+categories = ["api-bindings", "asynchronous"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[build-dependencies]
+# build.rs handles library search path injection — no extra deps needed.
+
+[dev-dependencies]
+# Integration tests skip automatically if AIORKA_TEST_ENABLED != "1"

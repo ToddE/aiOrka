@@ -188,6 +188,14 @@ class AiOrka internal constructor(
     }
 
     /**
+     * Inject or update an API key at runtime by environment variable name.
+     * Useful for C/Python/Go/Rust consumers that resolve keys after initialization.
+     */
+    fun setApiKey(envVarName: String, value: String) {
+        credentialResolver.addKey(envVarName, value)
+    }
+
+    /**
      * Returns a snapshot of the current health state for all configured providers.
      * Useful for diagnostics and monitoring dashboards.
      */

@@ -98,6 +98,15 @@ kotlin {
                 implementation(libs.ktor.client.winhttp)
             }
         }
+
+        // C API surface — shared across all four native C-interop targets (not iOS)
+        val nativeInteropMain by creating {
+            dependsOn(commonMain.get())
+        }
+        linuxX64Main.get().dependsOn(nativeInteropMain)
+        macosArm64Main.get().dependsOn(nativeInteropMain)
+        macosX64Main.get().dependsOn(nativeInteropMain)
+        mingwX64Main.get().dependsOn(nativeInteropMain)
     }
 }
 

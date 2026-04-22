@@ -3,12 +3,16 @@ package org.aiorka.credentials
 import org.aiorka.models.ProviderConfig
 import org.aiorka.platform.getEnvVariable
 
-class CredentialResolver(
-    private val injectedKeys: Map<String, String> = emptyMap()
-) {
+class CredentialResolver(injectedKeys: Map<String, String> = emptyMap()) {
+    private val keys: MutableMap<String, String> = injectedKeys.toMutableMap()
+
+    fun addKey(envVarName: String, value: String) {
+        keys[envVarName] = value
+    }
+
     fun resolve(provider: ProviderConfig): String? {
         val envVarName = provider.apiKeyEnv ?: return null
-        injectedKeys[envVarName]?.let { return it }
+        keys[envVarName]?.let { return it }
         return getEnvVariable(envVarName)
     }
 

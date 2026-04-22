@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aiorka"
+version = "0.1.0"
+description = "Policy-driven AI orchestration — Python bindings for the aiOrka native library"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.11"
+keywords = ["ai", "llm", "orchestration", "anthropic", "openai", "ollama"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+]
+
+# No runtime dependencies — only the stdlib ctypes module is required.
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/your-org/aiorka"
+Repository = "https://github.com/your-org/aiorka"
+
+[tool.hatch.build.targets.wheel]
+packages = ["aiorka"]
+
+# The native library is bundled inside the aiorka/ package directory so that
+# pip install works without any separate library installation step.
+[tool.hatch.build.targets.wheel.force-include]
+# These entries are filled in by scripts/build_native.sh after compilation:
+#   "../../shared/build/bin/linuxX64/releaseShared/libaiorka.so" = "aiorka/libaiorka.so"
+#   "../../shared/build/bin/macosArm64/releaseShared/libaiorka.dylib" = "aiorka/libaiorka.dylib"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
