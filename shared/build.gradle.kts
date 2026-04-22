@@ -68,6 +68,12 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
         }
 
+        val jvmTest by getting {
+            dependencies {
+                implementation(libs.junit.jupiter)
+            }
+        }
+
         jsMain.dependencies {
             implementation(libs.ktor.client.js)
         }
@@ -108,6 +114,10 @@ kotlin {
         macosX64Main.get().dependsOn(nativeInteropMain)
         mingwX64Main.get().dependsOn(nativeInteropMain)
     }
+}
+
+tasks.named<Test>("jvmTest") {
+    useJUnitPlatform()
 }
 
 android {

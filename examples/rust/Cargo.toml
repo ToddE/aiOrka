@@ -1,0 +1,12 @@
+[package]
+name = "aiorka-test-app"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "aiorka-test"
+path = "src/main.rs"
+
+[dependencies]
+aiorka = { path = "../../bindings/rust" }
+serde_json = "1"

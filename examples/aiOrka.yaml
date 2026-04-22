@@ -1,0 +1,92 @@
+# =============================================================================
+# aiOrka — Shared Test App Configuration
+# Used by all language test apps (Kotlin, Python, Go, Rust).
+# API keys are never stored here — they come from the .env file or env vars.
+# =============================================================================
+
+monitoring:
+  heartbeat:
+    enabled: true
+    interval_ms: 9999999    # Do not auto-ping; test apps drive this manually
+    timeout_ms: 8000
+    failure_threshold: 2
+    minimal_prompt: "."
+
+defaults:
+  retry:
+    max_attempts: 2
+    initial_backoff_ms: 300
+    max_backoff_ms: 3000
+
+providers:
+  # ── Local (no key required) ───────────────────────────────────────────────
+  local-qwen:
+    type: "ollama"
+    model_ref: "qwen3.5:9b"
+    endpoint: "http://localhost:11434"   # override with OLLAMA_ENDPOINT in .env
+    config:
+      num_ctx: "32768"
+
+  local-deepseek:
+    type: "ollama"
+    model_ref: "deepseek-r1-distill-llama-8b"
+    endpoint: "http://localhost:11434"
+
+  # ── Cloud ─────────────────────────────────────────────────────────────────
+  anthropic-sonnet:
+    type: "anthropic"
+    model_ref: "claude-sonnet-4-6"
+    api_key_env: "ANTHROPIC_API_KEY"
+
+  openai-gpt:
+    type: "openai"
+    model_ref: "gpt-4o-mini"
+    api_key_env: "OPENAI_API_KEY"
+
+  google-flash:
+    type: "gemini"
+    model_ref: "gemini-1.5-flash"
+    api_key_env: "GEMINI_API_KEY"
+
+  deepseek-cloud:
+    type: "deepseek"
+    model_ref: "deepseek-chat"
+    api_key_env: "DEEPSEEK_API_KEY"
+
+policies:
+  # Used by all test apps — tries every available provider in cost order
+  "test-chat":
+    description: "General smoke test — cheapest available provider wins."
+    strategy: "least-cost"
+    selection:
+      - "local-qwen"
+      - "google-flash"
+      - "deepseek-cloud"
+      - "openai-gpt"
+      - "anthropic-sonnet"
+
+  # Forces local-only — passes even with no API keys
+  "test-local":
+    description: "Local-only smoke test. No API keys required."
+    strategy: "fastest"
+    requirements:
+      connectivity: "local-only"
+    selection: ["local-qwen", "local-deepseek"]
+
+  # Requires reasoning capability
+  "test-reasoning":
+    description: "Reasoning smoke test."
+    strategy: "quality"
+    requirements:
+      features: ["reasoning"]
+    selection: ["local-deepseek", "deepseek-cloud", "anthropic-sonnet", "openai-gpt"]
+
+  # Fallback demo: primary has a deliberately bad key injected at runtime
+  "test-fallback":
+    description: "Fallback chain demo — skips providers with bad/missing keys."
+    strategy: "fastest"
+    selection:
+      - "anthropic-sonnet"
+      - "openai-gpt"
+      - "google-flash"
+      - "local-qwen"

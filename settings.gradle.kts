@@ -1,5 +1,6 @@
 rootProject.name = "aiOrka"
 include(":shared")
+include(":examples:kotlin")
 
 pluginManagement {
     repositories {
