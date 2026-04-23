@@ -694,4 +694,17 @@ Any provider with an OpenAI-compatible API can extend `OpenAiAdapter` with just 
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE).
+**aiOrka** is licensed under the **Business Source License 1.1 (BSL)**.
+
+### What this means
+
+  - **Free for almost everyone:** You are free to use, modify, and distribute aiOrka for any purpose, including internal commercial use, provided you are not building a competing "Managed AI Orchestration Service".
+
+  - **Managed Service Restriction:** You may not use aiOrka to provide a hosted or managed platform where the core value is offering our AI model routing, policy management, or brokerage functionality to third parties.
+
+  - **Becomes Open Source:** On **April 23, 2030**, this version of aiOrka will automatically convert to the **Apache License, Version 2.0**, making it fully open source.
+
+### Why BSL?
+We chose the BSL to ensure that aiOrka remains widely available to the developer community while preventing large cloud providers from commoditizing our hard work without contribution. This model allows us to fund the continued development of the library through supplemental service offerings like our **Managed Model Registry** and **Cloud Optimizer API**.
+
+For the full legal text, please see the [LICENSE.md](LICENSE.md) file.

@@ -1,3 +1,16 @@
+/*
+ * Copyright (c) 2026 PluralFusion INC. All rights reserved.
+ *
+ * Licensed under the Business Source License 1.1 (BSL).
+ * You may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ *
+ * https://github.com/ToddE/aiorka/blob/main/LICENSE.md
+ *
+ * See the LICENSE.md file in the root directory for full license terms,
+ * including the Additional Use Grant and Change Date.
+ */
+
 // Package aiorka provides Go bindings for the aiOrka native shared library.
 //
 // Quick start:
@@ -41,17 +54,17 @@ import (
 
 // Message is a single turn in a conversation.
 type Message struct {
-	Role    string `json:"role"`    // "user" | "assistant" | "system"
+	Role    string `json:"role"` // "user" | "assistant" | "system"
 	Content string `json:"content"`
 }
 
 // Response is the provider's reply to an Execute call.
 type Response struct {
-	Content    string  `json:"content"`
-	ProviderID string  `json:"provider_id"`
-	ModelUsed  string  `json:"model_used"`
-	DurationMs int64   `json:"duration_ms"`
-	TokensUsed *int    `json:"tokens_used,omitempty"`
+	Content    string   `json:"content"`
+	ProviderID string   `json:"provider_id"`
+	ModelUsed  string   `json:"model_used"`
+	DurationMs int64    `json:"duration_ms"`
+	TokensUsed *int     `json:"tokens_used,omitempty"`
 	Cost       *float64 `json:"cost,omitempty"`
 }
 
