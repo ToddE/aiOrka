@@ -10,6 +10,8 @@ aiOrka is a Kotlin Multiplatform library that acts as an intelligent broker betw
 - **Portable** — runs on Android, iOS, JVM, JavaScript, Linux, macOS, and Windows
 
 ---
+**Status:** Testing
+---
 
 ## Table of Contents
 
