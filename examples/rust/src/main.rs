@@ -56,7 +56,7 @@ fn load_config(env: &HashMap<String, String>) -> String {
 }
 
 fn active_keys(env: &HashMap<String, String>) -> String {
-    let found: Vec<_> = ["ANTHROPIC", "OPENAI", "GEMINI", "DEEPSEEK"]
+    let found: Vec<_> = ["ANTHROPIC", "OPENAI", "GEMINI", "DEEPSEEK", "QWEN"]
         .iter()
         .filter(|&&p| !env.get(&format!("{}_API_KEY", p)).map(String::as_str).unwrap_or("").is_empty())
         .map(|p| p.to_lowercase())
@@ -129,7 +129,7 @@ fn test_policy(client: &Client, policy_id: &str, prompt: &str) -> Result<String,
 fn test_fallback(env: &HashMap<String, String>, config_yaml: &str, prompt: &str) -> Result<String, aiorka::Error> {
     let mut client = Client::new(Config { config_yaml: Some(config_yaml.into()) })?;
     client.set_key("ANTHROPIC_API_KEY", "sk-ant-INVALID-FOR-FALLBACK-TEST");
-    for k in &["OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY"] {
+    for k in &["OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "QWEN_API_KEY"] {
         if let Some(v) = env.get(*k) {
             if !v.is_empty() {
                 client.set_key(k, v);
@@ -201,7 +201,7 @@ fn main() {
             process::exit(1);
         }
     };
-    for k in &["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY"] {
+    for k in &["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "QWEN_API_KEY"] {
         if let Some(v) = env.get(*k) {
             if !v.is_empty() {
                 client.set_key(k, v);

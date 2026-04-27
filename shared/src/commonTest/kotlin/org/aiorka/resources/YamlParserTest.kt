@@ -246,6 +246,43 @@ class YamlParserTest {
         assertTrue(config.policies.isEmpty())
     }
 
+    @Test
+    fun `parses provider with headers_env map`() {
+        val yaml = """
+            providers:
+              tunneled-server:
+                type: "selfhosted"
+                model_ref: "qwen3.5:9b"
+                endpoint: "https://tunnel.example.com"
+                headers_env:
+                  CF-Access-Client-Id: CLOUDFLARE_ACCESS_ID
+                  CF-Access-Client-Secret: CLOUDFLARE_ACCESS_SECRET
+        """.trimIndent()
+
+        val config = YamlParser.parseAppConfig(yaml)
+        val provider = config.providers["tunneled-server"]
+        assertNotNull(provider)
+        assertEquals("selfhosted", provider.type)
+        assertEquals(2, provider.headersEnv.size)
+        assertEquals("CLOUDFLARE_ACCESS_ID", provider.headersEnv["CF-Access-Client-Id"])
+        assertEquals("CLOUDFLARE_ACCESS_SECRET", provider.headersEnv["CF-Access-Client-Secret"])
+    }
+
+    @Test
+    fun `provider without headers_env defaults to empty map`() {
+        val yaml = """
+            providers:
+              cloud-provider:
+                type: "anthropic"
+                model_ref: "claude-sonnet-4-6"
+                api_key_env: "ANTHROPIC_API_KEY"
+        """.trimIndent()
+
+        val config = YamlParser.parseAppConfig(yaml)
+        val provider = config.providers["cloud-provider"]!!
+        assertTrue(provider.headersEnv.isEmpty())
+    }
+
     // -------------------------------------------------------------------------
     // Policy merge behaviour (simulated here, validated in AiOrkaTest)
     // -------------------------------------------------------------------------

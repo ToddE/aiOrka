@@ -104,6 +104,7 @@ If the winning provider fails, exponential-backoff retry selects the next best c
 | OpenAI GPT | `openai` | `OPENAI_API_KEY` | — |
 | Google Gemini | `gemini` | `GEMINI_API_KEY` | — |
 | DeepSeek | `deepseek` | `DEEPSEEK_API_KEY` | — |
+| Qwen.ai (Alibaba DashScope) | `qwen` | `QWEN_API_KEY` | — |
 
 `headers_env` injects arbitrary HTTP headers per request — useful for Cloudflare Access tokens, API gateway keys, or any header-based auth on tunneled self-hosted servers. See [Cloudflare Zero Trust Setup](#cloudflare-zero-trust-setup).
 
@@ -583,7 +584,7 @@ cp .env.example .env
 ./gradlew :shared:jvmTest --tests "*.IntegrationTest"
 ```
 
-The integration suite runs 12 ordered scenarios:
+The integration suite runs 13 ordered scenarios:
 
 | # | Scenario | Description |
 |---|---|---|
@@ -593,12 +594,13 @@ The integration suite runs 12 ordered scenarios:
 | 4 | OpenAI | Smoke test with real key |
 | 5 | Google Gemini | Smoke test with real key |
 | 6 | DeepSeek | Smoke test with real key |
-| 7 | Heartbeat | Records latency for reachable providers |
-| 8 | Fallback chain | Bad Anthropic key → succeeds via next provider |
-| 9 | All exhausted | Correctly throws when every provider fails |
-| 10 | Multi-turn | Context preserved across conversation turns |
-| 11 | Runtime key inject | `setApiKey()` works after `initialize()` |
-| 12 | Performance | Response time within configured `AIORKA_TEST_TIMEOUT_MS` |
+| 7 | Qwen.ai | Smoke test with real key |
+| 8 | Heartbeat | Records latency for reachable providers |
+| 9 | Fallback chain | Bad Anthropic key → succeeds via next provider |
+| 10 | All exhausted | Correctly throws when every provider fails |
+| 11 | Multi-turn | Context preserved across conversation turns |
+| 12 | Runtime key inject | `setApiKey()` works after `initialize()` |
+| 13 | Performance | Response time within configured `AIORKA_TEST_TIMEOUT_MS` |
 
 Tests for providers whose keys are not set are skipped automatically. Running with only a self-hosted server configured still exercises tests 1, 2, 7, and 9.
 

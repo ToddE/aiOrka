@@ -84,4 +84,54 @@ class CredentialResolverTest {
         assertEquals("sk-anthropic", resolver.resolve(provider("ANTHROPIC_API_KEY")))
         assertNull(resolver.resolve(provider("GEMINI_API_KEY")))  // not injected
     }
+
+    // -------------------------------------------------------------------------
+    // resolveHeaders
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun `resolveHeaders returns empty map for empty headersEnv`() {
+        val resolver = CredentialResolver()
+        assertEquals(emptyMap(), resolver.resolveHeaders(emptyMap()))
+    }
+
+    @Test
+    fun `resolveHeaders resolves injected keys to headers`() {
+        val resolver = CredentialResolver(
+            injectedKeys = mapOf(
+                "CLOUDFLARE_ACCESS_ID" to "id-abc123",
+                "CLOUDFLARE_ACCESS_SECRET" to "secret-xyz"
+            )
+        )
+        val headersEnv = mapOf(
+            "CF-Access-Client-Id" to "CLOUDFLARE_ACCESS_ID",
+            "CF-Access-Client-Secret" to "CLOUDFLARE_ACCESS_SECRET"
+        )
+        val result = resolver.resolveHeaders(headersEnv)
+        assertEquals("id-abc123", result["CF-Access-Client-Id"])
+        assertEquals("secret-xyz", result["CF-Access-Client-Secret"])
+    }
+
+    @Test
+    fun `resolveHeaders omits headers whose env var is not resolvable`() {
+        val resolver = CredentialResolver(
+            injectedKeys = mapOf("CLOUDFLARE_ACCESS_ID" to "id-abc123")
+        )
+        val headersEnv = mapOf(
+            "CF-Access-Client-Id" to "CLOUDFLARE_ACCESS_ID",
+            "CF-Access-Client-Secret" to "DEFINITELY_NOT_SET_XYZ_12345"
+        )
+        val result = resolver.resolveHeaders(headersEnv)
+        assertEquals(1, result.size)
+        assertEquals("id-abc123", result["CF-Access-Client-Id"])
+        assertFalse(result.containsKey("CF-Access-Client-Secret"))
+    }
+
+    @Test
+    fun `resolveHeaders uses addKey value over nothing`() {
+        val resolver = CredentialResolver()
+        resolver.addKey("MY_HEADER_VAR", "bearer-token")
+        val result = resolver.resolveHeaders(mapOf("Authorization" to "MY_HEADER_VAR"))
+        assertEquals("bearer-token", result["Authorization"])
+    }
 }

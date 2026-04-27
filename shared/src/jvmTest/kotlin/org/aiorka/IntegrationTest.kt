@@ -50,6 +50,8 @@ class IntegrationTest {
                         ?.let { apiKeys["GEMINI_API_KEY"] = it }
                     env["DEEPSEEK_API_KEY"]?.takeIf { it.isNotBlank() }
                         ?.let { apiKeys["DEEPSEEK_API_KEY"] = it }
+                    env["QWEN_API_KEY"]?.takeIf { it.isNotBlank() }
+                        ?.let { apiKeys["QWEN_API_KEY"] = it }
                 }
             }
             println("\n[aiOrka] Integration test suite initialized")
@@ -124,6 +126,10 @@ class IntegrationTest {
                 type: "deepseek"
                 model_ref: "deepseek-chat"
                 api_key_env: "DEEPSEEK_API_KEY"
+              qwen-cloud:
+                type: "qwen"
+                model_ref: "qwen-plus"
+                api_key_env: "QWEN_API_KEY"
               openai-gpt:
                 type: "openai"
                 model_ref: "gpt-4o-mini"
@@ -151,6 +157,10 @@ class IntegrationTest {
                 description: "DeepSeek smoke test"
                 strategy: "fastest"
                 selection: ["deepseek-cloud"]
+              "smoke-qwen":
+                description: "Qwen.ai smoke test"
+                strategy: "fastest"
+                selection: ["qwen-cloud"]
               "fallback-chain":
                 description: "Tests fallback: dead-provider → live-provider"
                 strategy: "fastest"
@@ -249,12 +259,23 @@ class IntegrationTest {
         assertTrue(resp.content.isNotBlank())
     }
 
+    @Test
+    @Order(7)
+    fun `Qwen AI responds to smoke test`() {
+        assumeTrue(hasKey("QWEN_API_KEY"), "QWEN_API_KEY not set — skipping")
+        val resp = runBlocking {
+            orka.execute("smoke-qwen", listOf(Message.user(testPrompt)))
+        }
+        println("\n[Qwen] ${resp.content.take(80)}  model=${resp.modelUsed}  ${resp.durationMs}ms")
+        assertTrue(resp.content.isNotBlank())
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // 4. Heartbeat — manual ping of all alive providers
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    @Order(7)
+    @Order(8)
     fun `heartbeat records latency for reachable providers`() {
         // Re-initialize with heartbeat enabled for a single tick
         val selfhostedEndpoint = env["SELFHOSTED_ENDPOINT"] ?: "http://localhost:11434"
@@ -267,6 +288,7 @@ class IntegrationTest {
                 env["GEMINI_API_KEY"]?.takeIf { it.isNotBlank() }?.let { apiKeys["GEMINI_API_KEY"] = it }
                 env["OPENAI_API_KEY"]?.takeIf { it.isNotBlank() }?.let { apiKeys["OPENAI_API_KEY"] = it }
                 env["DEEPSEEK_API_KEY"]?.takeIf { it.isNotBlank() }?.let { apiKeys["DEEPSEEK_API_KEY"] = it }
+                env["QWEN_API_KEY"]?.takeIf { it.isNotBlank() }?.let { apiKeys["QWEN_API_KEY"] = it }
             }
         }
 
@@ -294,7 +316,7 @@ class IntegrationTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    @Order(8)
+    @Order(9)
     fun `fallback chain skips dead provider and succeeds on next`() {
         // Inject a bad Anthropic key so the primary provider fails, triggering fallback
         val orkaWithBadKey = runBlocking {
@@ -306,6 +328,7 @@ class IntegrationTest {
                 env["GEMINI_API_KEY"]?.takeIf { it.isNotBlank() }?.let { apiKeys["GEMINI_API_KEY"] = it }
                 env["OPENAI_API_KEY"]?.takeIf { it.isNotBlank() }?.let { apiKeys["OPENAI_API_KEY"] = it }
                 env["DEEPSEEK_API_KEY"]?.takeIf { it.isNotBlank() }?.let { apiKeys["DEEPSEEK_API_KEY"] = it }
+                env["QWEN_API_KEY"]?.takeIf { it.isNotBlank() }?.let { apiKeys["QWEN_API_KEY"] = it }
             }
         }
 
@@ -326,7 +349,7 @@ class IntegrationTest {
     }
 
     @Test
-    @Order(9)
+    @Order(10)
     fun `all providers exhausted throws NoValidProviderException`() {
         val orkaAllDead = runBlocking {
             AiOrka.initialize {
@@ -365,7 +388,7 @@ class IntegrationTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    @Order(10)
+    @Order(11)
     fun `multi-turn conversation maintains context`() {
         assumeTrue(
             hasKey("ANTHROPIC_API_KEY") || hasKey("OPENAI_API_KEY") || hasKey("GEMINI_API_KEY"),
@@ -399,7 +422,7 @@ class IntegrationTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    @Order(11)
+    @Order(12)
     fun `setApiKey injected after initialization is used for subsequent calls`() {
         assumeTrue(hasKey("GEMINI_API_KEY"), "GEMINI_API_KEY not set — skipping")
 
@@ -431,7 +454,7 @@ class IntegrationTest {
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
-    @Order(12)
+    @Order(13)
     fun `response time is within acceptable range`() {
         assumeTrue(
             hasKey("ANTHROPIC_API_KEY") || hasKey("GEMINI_API_KEY") || hasKey("OPENAI_API_KEY"),

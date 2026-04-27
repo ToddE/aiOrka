@@ -196,6 +196,28 @@ models:
     cost_per_1k: 0.00005
     scores: { logic: 0.70, speed: 0.99 }
 
+  # Qwen.ai (Alibaba DashScope)
+  "qwen-max":
+    type: "cloud"
+    capabilities: ["reasoning", "coding", "complex-logic", "tools", "json_mode"]
+    context_window: 32768
+    cost_per_1k: 0.0024
+    scores: { logic: 0.93, speed: 0.65 } # Top-tier Qwen reasoning model
+
+  "qwen-plus":
+    type: "cloud"
+    capabilities: ["balanced-logic", "tools", "json_mode", "long-context"]
+    context_window: 131072
+    cost_per_1k: 0.0004
+    scores: { logic: 0.87, speed: 0.82 } # Best price-to-performance in the Qwen line
+
+  "qwen-turbo":
+    type: "cloud"
+    capabilities: ["fast-chat", "classification", "summarization", "json_mode"]
+    context_window: 131072
+    cost_per_1k: 0.00015
+    scores: { logic: 0.78, speed: 0.96 } # High-volume, low-cost routing tasks
+
   # Specialists & Niche
   "sonar-pro-24":
     type: "cloud"

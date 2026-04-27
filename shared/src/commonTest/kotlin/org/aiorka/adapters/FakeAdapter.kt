@@ -20,13 +20,18 @@ class FakeAdapter(
 
     override fun supportsProvider(type: String): Boolean = type == supportedType
 
+    var lastResolvedHeaders: Map<String, String> = emptyMap()
+        private set
+
     override suspend fun chat(
         providerId: String,
         provider: ProviderConfig,
         messages: List<Message>,
-        apiKey: String?
+        apiKey: String?,
+        resolvedHeaders: Map<String, String>
     ): OrkaResponse {
         callCount++
+        lastResolvedHeaders = resolvedHeaders
         if (callCount <= failTimes) {
             throw RuntimeException("Simulated failure #$callCount")
         }
@@ -50,6 +55,7 @@ class AlwaysFailAdapter(private val supportedType: String = "fake") : ProviderAd
         providerId: String,
         provider: ProviderConfig,
         messages: List<Message>,
-        apiKey: String?
+        apiKey: String?,
+        resolvedHeaders: Map<String, String>
     ): OrkaResponse = throw RuntimeException("Always fails")
 }

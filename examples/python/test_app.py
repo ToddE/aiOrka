@@ -58,7 +58,7 @@ def banner(title: str) -> str:
 
 
 def active_keys(env: dict[str, str]) -> str:
-    providers = ["ANTHROPIC", "OPENAI", "GEMINI", "DEEPSEEK"]
+    providers = ["ANTHROPIC", "OPENAI", "GEMINI", "DEEPSEEK", "QWEN"]
     found = [p.lower() for p in providers if env.get(f"{p}_API_KEY", "").strip()]
     return ", ".join(found) if found else "none (self-hosted only)"
 
@@ -120,7 +120,7 @@ def test_fallback(env: dict[str, str], config_yaml: str, prompt: str) -> str:
     # Inject bad Anthropic key so first provider in chain fails
     with AiOrka(config_yaml=config_yaml) as orka:
         orka.set_key("ANTHROPIC_API_KEY", "sk-ant-INVALID-FOR-FALLBACK-TEST")
-        for k in ["OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY"]:
+        for k in ["OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "QWEN_API_KEY"]:
             if env.get(k, "").strip():
                 orka.set_key(k, env[k])
         resp = orka.execute("test-fallback", [Message.user(prompt)])
@@ -187,7 +187,7 @@ def main() -> None:
     print(f"Keys    : {active_keys(env)}\n")
 
     with AiOrka(config_yaml=config_yaml) as orka:
-        for k in ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY"]:
+        for k in ["ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "QWEN_API_KEY"]:
             if env.get(k, "").strip():
                 orka.set_key(k, env[k])
 

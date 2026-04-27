@@ -24,6 +24,7 @@ fun main() {
             env["OPENAI_API_KEY"]?.ifNotBlank    { apiKeys["OPENAI_API_KEY"] = it }
             env["GEMINI_API_KEY"]?.ifNotBlank    { apiKeys["GEMINI_API_KEY"] = it }
             env["DEEPSEEK_API_KEY"]?.ifNotBlank  { apiKeys["DEEPSEEK_API_KEY"] = it }
+            env["QWEN_API_KEY"]?.ifNotBlank      { apiKeys["QWEN_API_KEY"] = it }
         }
     }
 
@@ -70,6 +71,7 @@ private fun testFallback(orka: AiOrka, env: Map<String, String>, prompt: String)
             env["OPENAI_API_KEY"]?.ifNotBlank   { apiKeys["OPENAI_API_KEY"] = it }
             env["GEMINI_API_KEY"]?.ifNotBlank   { apiKeys["GEMINI_API_KEY"] = it }
             env["DEEPSEEK_API_KEY"]?.ifNotBlank { apiKeys["DEEPSEEK_API_KEY"] = it }
+            env["QWEN_API_KEY"]?.ifNotBlank     { apiKeys["QWEN_API_KEY"] = it }
         }
     }
     return try {
@@ -167,7 +169,7 @@ private fun loadConfig(env: Map<String, String>): String {
 }
 
 private fun activeKeys(env: Map<String, String>): String {
-    val found = listOf("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY")
+    val found = listOf("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "QWEN_API_KEY")
         .filter { env[it]?.isNotBlank() == true }
         .map { it.removeSuffix("_API_KEY").lowercase() }
     return if (found.isEmpty()) "none (self-hosted only)" else found.joinToString(", ")

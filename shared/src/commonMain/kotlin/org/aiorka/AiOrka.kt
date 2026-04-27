@@ -109,7 +109,8 @@ class AiOrka internal constructor(
                 AnthropicAdapter(httpClient),
                 OpenAiAdapter(httpClient),
                 GeminiAdapter(httpClient),
-                DeepSeekAdapter(httpClient)
+                DeepSeekAdapter(httpClient),
+                QwenAdapter(httpClient)
             )
 
             // 8. Build SelectionEngine with credential check lambda

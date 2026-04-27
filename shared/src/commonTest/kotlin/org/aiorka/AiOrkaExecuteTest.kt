@@ -77,7 +77,8 @@ class AiOrkaExecuteTest {
             healthMonitor = healthMonitor,
             credentialResolver = credentialResolver,
             retryConfig = retryConfig,
-            scope = scope
+            scope = scope,
+            registry = registry
         )
     }
 

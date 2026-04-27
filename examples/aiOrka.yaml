@@ -53,6 +53,11 @@ providers:
     model_ref: "deepseek-chat"
     api_key_env: "DEEPSEEK_API_KEY"
 
+  qwen-cloud:
+    type: "qwen"
+    model_ref: "qwen-plus"
+    api_key_env: "QWEN_API_KEY"
+
 policies:
   # Used by all test apps — tries every available provider in cost order
   "test-chat":
@@ -61,6 +66,7 @@ policies:
     selection:
       - "local-qwen"
       - "google-flash"
+      - "qwen-cloud"
       - "deepseek-cloud"
       - "openai-gpt"
       - "anthropic-sonnet"

@@ -59,6 +59,11 @@ providers:
     model_ref: "deepseek-v4"
     api_key_env: "DEEPSEEK_API_KEY"
 
+  qwen-cloud:
+    type: "qwen"
+    model_ref: "qwen-plus"
+    api_key_env: "QWEN_API_KEY"
+
   openai-o1:
     type: "openai"
     model_ref: "o1"

@@ -73,7 +73,7 @@ func loadConfig(env map[string]string) string {
 }
 
 func activeKeys(env map[string]string) string {
-	providers := []string{"ANTHROPIC", "OPENAI", "GEMINI", "DEEPSEEK"}
+	providers := []string{"ANTHROPIC", "OPENAI", "GEMINI", "DEEPSEEK", "QWEN"}
 	var found []string
 	for _, p := range providers {
 		if strings.TrimSpace(env[p+"_API_KEY"]) != "" {
@@ -177,7 +177,7 @@ func testFallback(env map[string]string, configYAML, prompt string) (string, err
 	defer client.Close()
 
 	client.SetKey("ANTHROPIC_API_KEY", "sk-ant-INVALID-FOR-FALLBACK-TEST")
-	for _, k := range []string{"OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY"} {
+	for _, k := range []string{"OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "QWEN_API_KEY"} {
 		if v := strings.TrimSpace(env[k]); v != "" {
 			client.SetKey(k, v)
 		}
@@ -268,7 +268,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Failed to initialize: %v\n", err)
 		os.Exit(1)
 	}
-	for _, k := range []string{"ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY"} {
+	for _, k := range []string{"ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY", "QWEN_API_KEY"} {
 		if v := strings.TrimSpace(env[k]); v != "" {
 			client.SetKey(k, v)
 		}
