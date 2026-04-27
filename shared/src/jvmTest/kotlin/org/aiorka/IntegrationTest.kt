@@ -36,9 +36,8 @@ class IntegrationTest {
         fun setUp() {
             assumeIntegrationEnabled()
 
-            // Build a test config that overrides the Ollama endpoint from .env
-            val ollamaEndpoint = env["OLLAMA_ENDPOINT"] ?: "http://localhost:11434"
-            val configYaml = buildTestConfig(ollamaEndpoint)
+            val selfhostedEndpoint = env["SELFHOSTED_ENDPOINT"] ?: "http://localhost:11434"
+            val configYaml = buildTestConfig(selfhostedEndpoint)
 
             orka = runBlocking {
                 AiOrka.initialize {
@@ -95,7 +94,7 @@ class IntegrationTest {
 
         // ── Minimal test aiOrka.yaml (overrides endpoint from .env) ──────────
 
-        private fun buildTestConfig(ollamaEndpoint: String) = """
+        private fun buildTestConfig(selfhostedEndpoint: String) = """
             monitoring:
               heartbeat:
                 enabled: false        # We drive heartbeat manually in tests
@@ -106,13 +105,13 @@ class IntegrationTest {
                 max_backoff_ms: 2000
             providers:
               local-qwen:
-                type: "ollama"
+                type: "selfhosted"
                 model_ref: "qwen3.5:9b"
-                endpoint: "$ollamaEndpoint"
+                endpoint: "$selfhostedEndpoint"
               local-deepseek:
-                type: "ollama"
+                type: "selfhosted"
                 model_ref: "deepseek-r1-distill-llama-8b"
-                endpoint: "$ollamaEndpoint"
+                endpoint: "$selfhostedEndpoint"
               google-flash:
                 type: "gemini"
                 model_ref: "gemini-3.1-flash"
@@ -183,22 +182,21 @@ class IntegrationTest {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // 2. Local Ollama
+    // 2. Self-hosted inference
     // ─────────────────────────────────────────────────────────────────────────
 
     @Test
     @Order(2)
-    fun `local Ollama responds to smoke test`() {
-        // Skip gracefully if Ollama is not running
+    fun `self-hosted inference responds to smoke test`() {
         runCatching {
             val resp = runBlocking {
                 orka.execute("smoke-local", listOf(Message.user(testPrompt)))
             }
-            println("\n[Ollama] ${resp.content.take(80)}  (${resp.durationMs}ms)")
+            println("\n[Self-hosted] ${resp.content.take(80)}  (${resp.durationMs}ms)")
             assertTrue(resp.content.isNotBlank())
             assertFalse(resp.providerId.isBlank())
         }.onFailure { e ->
-            assumeTrue(false, "Ollama not available: ${e.message}")
+            assumeTrue(false, "Self-hosted server not available: ${e.message}")
         }
     }
 
@@ -259,10 +257,10 @@ class IntegrationTest {
     @Order(7)
     fun `heartbeat records latency for reachable providers`() {
         // Re-initialize with heartbeat enabled for a single tick
-        val ollamaEndpoint = env["OLLAMA_ENDPOINT"] ?: "http://localhost:11434"
+        val selfhostedEndpoint = env["SELFHOSTED_ENDPOINT"] ?: "http://localhost:11434"
         val orkaWithHeartbeat = runBlocking {
             AiOrka.initialize {
-                this.configYaml = buildTestConfig(ollamaEndpoint)
+                this.configYaml = buildTestConfig(selfhostedEndpoint)
                     .replace("enabled: false", "enabled: true")
                     .replace("interval_ms: 300000", "interval_ms: 999999999") // don't auto-ping again
                 env["ANTHROPIC_API_KEY"]?.takeIf { it.isNotBlank() }?.let { apiKeys["ANTHROPIC_API_KEY"] = it }
@@ -288,7 +286,7 @@ class IntegrationTest {
         orkaWithHeartbeat.shutdown()
 
         // At least one provider must be reachable for the suite to be meaningful
-        assertTrue(alive > 0, "No providers responded to heartbeat — check your .env keys and Ollama status")
+        assertTrue(alive > 0, "No providers responded to heartbeat — check your .env keys and self-hosted server status")
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -302,7 +300,7 @@ class IntegrationTest {
         val orkaWithBadKey = runBlocking {
             AiOrka.initialize {
                 this.configYaml = buildTestConfig(
-                    env["OLLAMA_ENDPOINT"] ?: "http://localhost:11434"
+                    env["SELFHOSTED_ENDPOINT"] ?: "http://localhost:11434"
                 )
                 apiKeys["ANTHROPIC_API_KEY"] = "sk-ant-INVALID-KEY-FOR-FALLBACK-TEST"
                 env["GEMINI_API_KEY"]?.takeIf { it.isNotBlank() }?.let { apiKeys["GEMINI_API_KEY"] = it }
@@ -408,7 +406,7 @@ class IntegrationTest {
         val orkaNoKeys = runBlocking {
             AiOrka.initialize {
                 this.configYaml = buildTestConfig(
-                    env["OLLAMA_ENDPOINT"] ?: "http://localhost:11434"
+                    env["SELFHOSTED_ENDPOINT"] ?: "http://localhost:11434"
                 )
                 // Intentionally NOT pre-loading any keys
             }

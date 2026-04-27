@@ -14,7 +14,7 @@ fun main() {
     val config = loadConfig(env)
 
     println("Config  : examples/aiOrka.yaml")
-    println("Endpoint: ${env["OLLAMA_ENDPOINT"] ?: "http://localhost:11434"}")
+    println("Endpoint: ${env["SELFHOSTED_ENDPOINT"] ?: "http://localhost:11434 (default)"}")
     println("Keys    : ${activeKeys(env)}\n")
 
     val orka = runBlocking {
@@ -155,8 +155,7 @@ private fun loadEnv(): Map<String, String> {
 }
 
 private fun loadConfig(env: Map<String, String>): String {
-    val ollamaEndpoint = env["OLLAMA_ENDPOINT"] ?: "http://localhost:11434"
-    // Resolve config relative to this file's location, then fall back to CWD
+    val selfhostedEndpoint = env["SELFHOSTED_ENDPOINT"] ?: "http://localhost:11434"
     val candidates = listOf(
         File(System.getProperty("user.dir")).resolve("../aiOrka.yaml"),
         File(System.getProperty("user.dir")).resolve("examples/aiOrka.yaml"),
@@ -164,14 +163,14 @@ private fun loadConfig(env: Map<String, String>): String {
     )
     val yaml = candidates.firstOrNull { it.exists() }?.readText()
         ?: error("Cannot locate examples/aiOrka.yaml — run from the repo root")
-    return yaml.replace("http://localhost:11434", ollamaEndpoint)
+    return yaml.replace("http://localhost:11434", selfhostedEndpoint)
 }
 
 private fun activeKeys(env: Map<String, String>): String {
     val found = listOf("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "GEMINI_API_KEY", "DEEPSEEK_API_KEY")
         .filter { env[it]?.isNotBlank() == true }
         .map { it.removeSuffix("_API_KEY").lowercase() }
-    return if (found.isEmpty()) "none (local Ollama only)" else found.joinToString(", ")
+    return if (found.isEmpty()) "none (self-hosted only)" else found.joinToString(", ")
 }
 
 private fun String.ifNotBlank(block: (String) -> Unit) {

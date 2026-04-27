@@ -50,12 +50,13 @@ class HeartbeatManager(
     ) {
         val adapter = adapters.firstOrNull { it.supportsProvider(provider.type) } ?: return
         val apiKey = credentialResolver.resolve(provider)
+        val resolvedHeaders = credentialResolver.resolveHeaders(provider.headersEnv)
         val pingMessages = listOf(Message.user(config.minimalPrompt))
 
         val start = currentTimeMillis()
         val success = try {
             withTimeout(config.timeoutMs) {
-                adapter.chat(providerId, provider, pingMessages, apiKey)
+                adapter.chat(providerId, provider, pingMessages, apiKey, resolvedHeaders)
             }
             true
         } catch (_: Exception) {

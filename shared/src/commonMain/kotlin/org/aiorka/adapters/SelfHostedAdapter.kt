@@ -13,54 +13,56 @@ import org.aiorka.models.ResponseMetadata
 import org.aiorka.platform.currentTimeMillis
 
 @Serializable
-private data class OllamaChatRequest(
+private data class SelfHostedChatRequest(
     val model: String,
-    val messages: List<OllamaMessage>,
+    val messages: List<SelfHostedMessage>,
     val stream: Boolean = false,
     val options: Map<String, Int> = emptyMap()
 )
 
 @Serializable
-private data class OllamaMessage(
+private data class SelfHostedMessage(
     val role: String,
     val content: String
 )
 
 @Serializable
-private data class OllamaChatResponse(
+private data class SelfHostedChatResponse(
     val model: String,
-    val message: OllamaMessage,
+    val message: SelfHostedMessage,
     @SerialName("prompt_eval_count") val promptEvalCount: Int? = null,
     @SerialName("eval_count") val evalCount: Int? = null,
     @SerialName("total_duration") val totalDurationNs: Long? = null
 )
 
-class OllamaAdapter(private val httpClient: HttpClient) : ProviderAdapter {
+class SelfHostedAdapter(private val httpClient: HttpClient) : ProviderAdapter {
 
-    override fun supportsProvider(type: String): Boolean = type == "ollama"
+    override fun supportsProvider(type: String): Boolean = type == "selfhosted"
 
     override suspend fun chat(
         providerId: String,
         provider: ProviderConfig,
         messages: List<Message>,
-        apiKey: String?
+        apiKey: String?,
+        resolvedHeaders: Map<String, String>
     ): OrkaResponse {
         val baseUrl = provider.endpoint
-            ?: throw IllegalArgumentException("Ollama provider '$providerId' has no endpoint configured")
+            ?: throw IllegalArgumentException("Self-hosted provider '$providerId' has no endpoint configured")
 
         val numCtx = provider.config["num_ctx"]?.toIntOrNull()
         val options = if (numCtx != null) mapOf("num_ctx" to numCtx) else emptyMap()
 
-        val request = OllamaChatRequest(
+        val request = SelfHostedChatRequest(
             model = provider.modelRef,
-            messages = messages.map { OllamaMessage(it.role, it.content) },
+            messages = messages.map { SelfHostedMessage(it.role, it.content) },
             stream = false,
             options = options
         )
 
         val start = currentTimeMillis()
-        val response: OllamaChatResponse = httpClient.post("$baseUrl/api/chat") {
+        val response: SelfHostedChatResponse = httpClient.post("$baseUrl/api/chat") {
             contentType(ContentType.Application.Json)
+            resolvedHeaders.forEach { (name, value) -> header(name, value) }
             setBody(request)
         }.body()
         val durationMs = currentTimeMillis() - start

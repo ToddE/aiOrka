@@ -55,7 +55,8 @@ open class OpenAiAdapter(
         providerId: String,
         provider: ProviderConfig,
         messages: List<Message>,
-        apiKey: String?
+        apiKey: String?,
+        resolvedHeaders: Map<String, String>
     ): OrkaResponse {
         requireNotNull(apiKey) { "Provider '$providerId' requires an API key" }
 

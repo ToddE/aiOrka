@@ -10,7 +10,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -61,7 +60,7 @@ func loadConfig(env map[string]string) string {
 	for _, p := range candidates {
 		data, err := os.ReadFile(p)
 		if err == nil {
-			endpoint := env["OLLAMA_ENDPOINT"]
+			endpoint := env["SELFHOSTED_ENDPOINT"]
 			if endpoint == "" {
 				endpoint = "http://localhost:11434"
 			}
@@ -82,7 +81,7 @@ func activeKeys(env map[string]string) string {
 		}
 	}
 	if len(found) == 0 {
-		return "none (local Ollama only)"
+		return "none (self-hosted only)"
 	}
 	return strings.Join(found, ", ")
 }
@@ -257,7 +256,7 @@ func main() {
 	fmt.Printf("Platform: %s/%s\n", runtime.GOOS, runtime.GOARCH)
 	fmt.Printf("Config  : examples/aiOrka.yaml\n")
 	fmt.Printf("Endpoint: %s\n", func() string {
-		if ep := env["OLLAMA_ENDPOINT"]; ep != "" {
+		if ep := env["SELFHOSTED_ENDPOINT"]; ep != "" {
 			return ep
 		}
 		return "http://localhost:11434"

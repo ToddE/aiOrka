@@ -21,14 +21,14 @@ defaults:
 providers:
   # ── Local (no key required) ───────────────────────────────────────────────
   local-qwen:
-    type: "ollama"
+    type: "selfhosted"
     model_ref: "qwen3.5:9b"
-    endpoint: "http://localhost:11434"   # override with OLLAMA_ENDPOINT in .env
+    endpoint: "http://localhost:11434"   # override with SELFHOSTED_ENDPOINT in .env
     config:
       num_ctx: "32768"
 
   local-deepseek:
-    type: "ollama"
+    type: "selfhosted"
     model_ref: "deepseek-r1-distill-llama-8b"
     endpoint: "http://localhost:11434"
 

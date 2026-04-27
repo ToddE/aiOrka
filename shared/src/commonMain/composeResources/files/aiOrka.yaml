@@ -28,14 +28,17 @@ defaults:
 # 2. Infrastructure Fleet
 providers:
   local-qwen:
-    type: "ollama"
+    type: "selfhosted"
     model_ref: "qwen3.5:9b"
     endpoint: "http://localhost:11434"
     config:
       num_ctx: 32768
-  
+    # headers_env:                        # Optional: uncomment for tunneled servers
+    #   CF-Access-Client-Id: CLOUDFLARE_ACCESS_ID
+    #   CF-Access-Client-Secret: CLOUDFLARE_ACCESS_SECRET
+
   local-deepseek:
-    type: "ollama"
+    type: "selfhosted"
     model_ref: "deepseek-r1-distill-llama-8b"
     endpoint: "http://localhost:11434"
     description: "Local reasoning specialist."

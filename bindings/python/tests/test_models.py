@@ -33,7 +33,7 @@ def test_messages_serialise_to_json():
 def test_orka_response_optional_fields():
     r = OrkaResponse(
         content="Hello",
-        provider_id="ollama-local",
+        provider_id="selfhosted-local",
         model_used="llama3",
         duration_ms=120,
     )

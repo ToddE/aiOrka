@@ -19,6 +19,9 @@ import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import org.aiorka.adapters.*
+import org.aiorka.benchmark.BenchmarkConfig
+import org.aiorka.benchmark.BenchmarkReport
+import org.aiorka.benchmark.BenchmarkRunner
 import org.aiorka.credentials.CredentialResolver
 import org.aiorka.engine.SelectionEngine
 import org.aiorka.models.*
@@ -47,7 +50,8 @@ class AiOrka internal constructor(
     private val healthMonitor: HealthMonitor,
     private val credentialResolver: CredentialResolver,
     private val retryConfig: RetryConfig,
-    private val scope: CoroutineScope
+    private val scope: CoroutineScope,
+    private val registry: ModelRegistry
 ) {
 
     class Builder {
@@ -101,7 +105,7 @@ class AiOrka internal constructor(
 
             // 7. Register all adapters
             val adapters: List<ProviderAdapter> = listOf(
-                OllamaAdapter(httpClient),
+                SelfHostedAdapter(httpClient),
                 AnthropicAdapter(httpClient),
                 OpenAiAdapter(httpClient),
                 GeminiAdapter(httpClient),
@@ -139,7 +143,8 @@ class AiOrka internal constructor(
                 healthMonitor = healthMonitor,
                 credentialResolver = credentialResolver,
                 retryConfig = retryConfig,
-                scope = scope
+                scope = scope,
+                registry = registry
             )
         }
     }
@@ -174,10 +179,11 @@ class AiOrka internal constructor(
                     )
 
                 val apiKey = credentialResolver.resolve(provider)
+                val resolvedHeaders = credentialResolver.resolveHeaders(provider.headersEnv)
                 val start = currentTimeMillis()
 
                 return@withContext try {
-                    val response = adapter.chat(providerId, provider, messages, apiKey)
+                    val response = adapter.chat(providerId, provider, messages, apiKey, resolvedHeaders)
                     healthMonitor.recordSuccess(providerId, currentTimeMillis() - start)
                     response
                 } catch (e: Exception) {
@@ -213,6 +219,29 @@ class AiOrka internal constructor(
      * Useful for diagnostics and monitoring dashboards.
      */
     fun healthSnapshot() = healthMonitor.snapshot()
+
+    /**
+     * Runs every prompt in [config] against each target provider and writes a
+     * human-readable Markdown report to [BenchmarkConfig.outputPath] (or a
+     * timestamped file in the current directory if omitted).
+     *
+     * Providers within each prompt are queried in parallel. The returned
+     * [BenchmarkReport] contains the raw results for programmatic inspection.
+     */
+    suspend fun benchmark(config: BenchmarkConfig): BenchmarkReport =
+        withContext(Dispatchers.Default) {
+            val targetIds = config.providerIds ?: mergedProviders.keys.toList()
+            val targetProviders = targetIds.mapNotNull { id ->
+                mergedProviders[id]?.let { id to it }
+            }.toMap()
+
+            BenchmarkRunner(
+                providers = targetProviders,
+                adapters = adapters,
+                credentialResolver = credentialResolver,
+                registry = registry
+            ).run(config)
+        }
 
     /**
      * Gracefully shuts down background tasks. Call from application teardown.

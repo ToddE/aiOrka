@@ -9,7 +9,7 @@ description = "Policy-driven AI orchestration — Python bindings for the aiOrka
 readme = "README.md"
 license = { text = "Apache-2.0" }
 requires-python = ">=3.11"
-keywords = ["ai", "llm", "orchestration", "anthropic", "openai", "ollama"]
+keywords = ["ai", "llm", "orchestration", "anthropic", "openai", "selfhosted"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",

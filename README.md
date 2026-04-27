@@ -25,6 +25,7 @@ aiOrka is a Kotlin Multiplatform library that acts as an intelligent broker betw
   - [aiOrka.yaml](#aiorkayaml)
   - [Policy Reference](#policy-reference)
 - [Quick Start — Kotlin / JVM](#quick-start--kotlin--jvm)
+- [Benchmarking](#benchmarking)
 - [Language Bindings](#language-bindings)
   - [Python](#python)
   - [Go](#go)
@@ -96,13 +97,15 @@ If the winning provider fails, exponential-backoff retry selects the next best c
 
 ## Supported Providers
 
-| Provider | Type | Key env var |
-|---|---|---|
-| Ollama (local) | `ollama` | *(none required)* |
-| Anthropic Claude | `anthropic` | `ANTHROPIC_API_KEY` |
-| OpenAI GPT | `openai` | `OPENAI_API_KEY` |
-| Google Gemini | `gemini` | `GEMINI_API_KEY` |
-| DeepSeek | `deepseek` | `DEEPSEEK_API_KEY` |
+| Provider | Type | Key env var | Auth headers |
+|---|---|---|---|
+| Self-hosted (Ollama, LM Studio, Msty, …) | `selfhosted` | *(none)* | `headers_env` (optional) |
+| Anthropic Claude | `anthropic` | `ANTHROPIC_API_KEY` | — |
+| OpenAI GPT | `openai` | `OPENAI_API_KEY` | — |
+| Google Gemini | `gemini` | `GEMINI_API_KEY` | — |
+| DeepSeek | `deepseek` | `DEEPSEEK_API_KEY` | — |
+
+`headers_env` injects arbitrary HTTP headers per request — useful for Cloudflare Access tokens, API gateway keys, or any header-based auth on tunneled self-hosted servers. See [Cloudflare Zero Trust Setup](#cloudflare-zero-trust-setup).
 
 ---
 
@@ -143,11 +146,13 @@ aiOrka/
 │   ├── src/
 │   │   ├── commonMain/kotlin/org/aiorka/
 │   │   │   ├── AiOrka.kt            # Main entry point
-│   │   │   ├── adapters/            # Provider adapters (Ollama, Anthropic, OpenAI…)
-│   │   │   ├── credentials/         # API key resolution
+│   │   │   ├── adapters/            # Provider adapters (SelfHosted, Anthropic, OpenAI…)
+│   │   │   ├── benchmark/           # BenchmarkRunner, MarkdownReporter, config + models
+│   │   │   ├── credentials/         # API key and header resolution
 │   │   │   ├── engine/              # SelectionEngine (the 4-stage funnel)
 │   │   │   ├── models/              # RegistryModels, Message, OrkaResponse
 │   │   │   ├── monitoring/          # HealthMonitor, HeartbeatManager
+│   │   │   ├── platform/            # expect/actual: time, env vars, file I/O, timestamps
 │   │   │   └── resources/           # YamlParser, ResourceLoader
 │   │   ├── commonMain/composeResources/files/
 │   │   │   ├── models-registry.yaml # 30+ model capability/cost database
@@ -198,9 +203,9 @@ OPENAI_API_KEY=sk-...
 GEMINI_API_KEY=AI...
 DEEPSEEK_API_KEY=sk-...
 
-# Local Ollama
-OLLAMA_ENDPOINT=http://localhost:11434
-OLLAMA_MODELS=qwen3.5:9b
+# Self-hosted inference server
+SELFHOSTED_ENDPOINT=http://localhost:11434
+SELFHOSTED_MODELS=qwen3.5:9b
 
 # Integration tests (set to true to make real API calls)
 AIORKA_INTEGRATION_TESTS=false
@@ -212,6 +217,10 @@ AIORKA_TEST_PROMPT=Hello! Reply in exactly five words.
 # Native bindings (Python / Go / Rust)
 AIORKA_LIB_PATH=          # absolute path to libaiorka.so/.dylib/.dll
 AIORKA_TEST_ENABLED=0     # set to 1 to enable native binding tests
+
+# Cloudflare Authentication
+CLOUDFLARE_ACCESS_ID=
+CLOUDFLARE_ACCESS_SECRET=
 ```
 
 The library reads keys from this priority order:
@@ -248,9 +257,13 @@ defaults:
 
 providers:
   local-qwen:
-    type: "ollama"
+    type: "selfhosted"
     model_ref: "qwen3.5:9b"
     endpoint: "http://localhost:11434"
+    # For servers behind a Cloudflare Access tunnel, add headers_env:
+    # headers_env:
+    #   CF-Access-Client-Id: CLOUDFLARE_ACCESS_ID
+    #   CF-Access-Client-Secret: CLOUDFLARE_ACCESS_SECRET
 
   anthropic-sonnet:
     type: "anthropic"
@@ -267,6 +280,17 @@ policies:
     strategy: "least-cost"
     selection: ["local-qwen", "google-flash", "anthropic-sonnet"]
 ```
+
+#### Provider fields reference
+
+| Field | Required | Description |
+|---|---|---|
+| `type` | ✓ | Provider adapter: `selfhosted`, `anthropic`, `openai`, `gemini`, `deepseek` |
+| `model_ref` | ✓ | Model identifier passed to the provider API |
+| `endpoint` | selfhosted only | Base URL of the inference server (e.g. `http://localhost:11434`) |
+| `api_key_env` | cloud only | Name of the env var holding the API key |
+| `headers_env` | optional | Map of `Header-Name: ENV_VAR_NAME` pairs injected on every request. Use for Cloudflare Access tokens, Bearer tokens, or any custom auth header. |
+| `config` | optional | Provider-specific settings (e.g. `num_ctx` for self-hosted servers) |
 
 ### Policy Reference
 
@@ -361,6 +385,67 @@ snapshot.forEach { (id, status) ->
     println("$id → alive=${status.isAlive}, latency=${status.lastLatencyMs}ms")
 }
 ```
+
+---
+
+## Benchmarking
+
+`benchmark()` runs one or more prompts against every configured provider in parallel and writes a human-readable Markdown report. It is designed for manual evaluation: you read the output, compare responses, and adjust your `policies.yaml` accordingly.
+
+```kotlin
+val report = orka.benchmark(
+    BenchmarkConfig(
+        prompts = listOf(
+            "Explain quantum entanglement in one sentence.",
+            "Write a Python function that reverses a string."
+        ),
+        providerIds = null,       // null = all configured providers
+        outputPath = "eval.md"    // null = aiorka-benchmark-{timestamp}.md
+    )
+)
+println("Report written to: ${report.outputPath}")
+```
+
+**Report structure** — for each prompt the report contains:
+
+- A **Performance** table sorted by latency (provider, model, latency, tokens, estimated cost, status)
+- A **Responses** section with each provider's full reply
+- An **Overall Summary** table aggregated across all prompts
+
+**Example output:**
+
+```markdown
+# aiOrka Benchmark Report
+
+**Generated:** 2026-04-27 14:32:01 UTC
+**Providers tested:** 3 (local-qwen, anthropic-sonnet, google-flash)
+**Prompts:** 2
+
+---
+
+## Prompt 1 of 2
+
+> Explain quantum entanglement in one sentence.
+
+### Performance
+
+| Provider         | Model               | Latency | Tokens | Est. Cost  | Status |
+|:-----------------|:--------------------|--------:|-------:|-----------:|:------:|
+| google-flash     | `gemini-1.5-flash`  |   430ms |     78 | $0.000008  |   ✓    |
+| anthropic-sonnet | `claude-sonnet-4-6` |   890ms |     92 | $0.000276  |   ✓    |
+| local-qwen       | `qwen3.5:9b`        | 1,240ms |     87 | free       |   ✓    |
+
+*Sorted by latency ascending.*
+
+### Responses
+
+---
+**google-flash** · `gemini-1.5-flash` · 430ms
+
+Quantum entanglement is a phenomenon where two particles...
+```
+
+Cost is computed from the model registry's `cost_per_1k` value. Self-hosted models show `free`. Providers that error show the error message in place of a response — they are never silently dropped.
 
 ---
 
@@ -503,7 +588,7 @@ The integration suite runs 12 ordered scenarios:
 | # | Scenario | Description |
 |---|---|---|
 | 1 | Health Snapshot | All configured providers appear in snapshot |
-| 2 | Local Ollama | Round-trip with no API key |
+| 2 | Self-hosted | Round-trip with no API key |
 | 3 | Anthropic | Smoke test with real key |
 | 4 | OpenAI | Smoke test with real key |
 | 5 | Google Gemini | Smoke test with real key |
@@ -515,7 +600,7 @@ The integration suite runs 12 ordered scenarios:
 | 11 | Runtime key inject | `setApiKey()` works after `initialize()` |
 | 12 | Performance | Response time within configured `AIORKA_TEST_TIMEOUT_MS` |
 
-Tests for providers whose keys are not set are skipped automatically. Running with only Ollama configured still exercises tests 1, 2, 7, and 9.
+Tests for providers whose keys are not set are skipped automatically. Running with only a self-hosted server configured still exercises tests 1, 2, 7, and 9.
 
 ### Test Apps (all languages)
 
@@ -530,7 +615,7 @@ The `examples/` directory contains identical test apps in Kotlin, Python, Go, an
 | # | Scenario | What it verifies |
 |---|---|---|
 | 1 | Health Snapshot | Library initializes; all providers registered |
-| 2 | Local Inference | Ollama responds with no API key |
+| 2 | Local Inference | Self-hosted server responds with no API key |
 | 3 | General Chat | Least-cost routing selects cheapest live provider |
 | 4 | Reasoning | Capability filter routes to a reasoning-capable model |
 | 5 | Fallback Chain | Invalid Anthropic key → falls through to next live provider |
@@ -677,6 +762,47 @@ char* aiorka_version(void);
 **Memory contract:** Every non-void return value is heap-allocated. The caller owns it and must free it with `aiorka_free_string()`. Passing `NULL` to `aiorka_free_string` is a no-op.
 
 ---
+## Cloudflare Zero Trust Setup
+
+Self-hosted inference servers (Ollama, LM Studio, Msty, etc.) are typically exposed via a Cloudflare Tunnel when accessed remotely. Cloudflare Access **Service Tokens** let aiOrka authenticate to the tunnel without exposing the server to the public internet.
+
+### Step 1 — Create a Service Token
+
+1. Open the **Cloudflare Zero Trust Dashboard → Access → Service Tokens**.
+2. Click **Create Service Token**. Name it (e.g., `aiOrka-Client`).
+3. Copy the **Client ID** and **Client Secret** into your `.env`:
+
+```bash
+CLOUDFLARE_ACCESS_ID=your-client-id.access
+CLOUDFLARE_ACCESS_SECRET=your-client-secret
+```
+
+### Step 2 — Protect the Application
+
+1. Go to **Access → Applications** and open (or create) the application for your tunnel endpoint.
+2. Under **Policies**, add a policy: **Action:** Service Auth → **Include:** the token from Step 1.
+3. Save.
+
+### Step 3 — Wire up aiOrka.yaml
+
+Add `headers_env` to any `selfhosted` provider that lives behind the tunnel. aiOrka resolves the env var values at runtime and injects them as HTTP headers on every request.
+
+```yaml
+providers:
+  remote-qwen:
+    type: "selfhosted"
+    model_ref: "qwen3.5:9b"
+    endpoint: "https://your-tunnel.example.com"
+    headers_env:
+      CF-Access-Client-Id: CLOUDFLARE_ACCESS_ID
+      CF-Access-Client-Secret: CLOUDFLARE_ACCESS_SECRET
+```
+
+`headers_env` is not Cloudflare-specific — use the same mechanism for any header-based auth (Bearer tokens, API gateway keys, etc.).
+
+Once configured, Cloudflare only admits requests that carry the valid service token headers, so the inference server remains private.
+
+---
 
 ## Contributing
 
@@ -688,7 +814,7 @@ Pricing and benchmark data drifts quickly. PRs that update `cost_per_1k`, `conte
 **New adapters** — implement `ProviderAdapter` in `shared/src/commonMain/kotlin/org/aiorka/adapters/`  
 Any provider with an OpenAI-compatible API can extend `OpenAiAdapter` with just a URL change.
 
-**New platform targets** — add `actual` implementations for `currentTimeMillis()` and `getEnvVariable()` in the new platform source set.
+**New platform targets** — add `actual` implementations for `currentTimeMillis()`, `getEnvVariable()`, `writeTextFile()`, and `formatTimestamp()` in the new platform source set.
 
 **Bug reports and feature requests** — open an issue at the repository.
 

@@ -60,7 +60,8 @@ class GeminiAdapter(private val httpClient: HttpClient) : ProviderAdapter {
         providerId: String,
         provider: ProviderConfig,
         messages: List<Message>,
-        apiKey: String?
+        apiKey: String?,
+        resolvedHeaders: Map<String, String>
     ): OrkaResponse {
         requireNotNull(apiKey) { "Gemini provider '$providerId' requires an API key" }
 

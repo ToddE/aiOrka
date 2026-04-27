@@ -20,4 +20,10 @@ class CredentialResolver(injectedKeys: Map<String, String> = emptyMap()) {
         if (provider.apiKeyEnv == null) return true
         return resolve(provider) != null
     }
+
+    fun resolveHeaders(headersEnv: Map<String, String>): Map<String, String> =
+        headersEnv.mapNotNull { (headerName, envVarName) ->
+            val value = keys[envVarName] ?: getEnvVariable(envVarName)
+            if (value != null) headerName to value else null
+        }.toMap()
 }

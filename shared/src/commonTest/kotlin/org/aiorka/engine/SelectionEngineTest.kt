@@ -46,7 +46,7 @@ class SelectionEngineTest {
 
     private val providers = mapOf(
         "local-qwen" to ProviderConfig(
-            type = "ollama",
+            type = "selfhosted",
             modelRef = "qwen3.5:9b",
             endpoint = "http://localhost:11434"
         ),
@@ -61,7 +61,7 @@ class SelectionEngineTest {
             apiKeyEnv = "ANTHROPIC_API_KEY"
         ),
         "local-deepseek" to ProviderConfig(
-            type = "ollama",
+            type = "selfhosted",
             modelRef = "deepseek-r1-distill-llama-8b",
             endpoint = "http://localhost:11434"
         )

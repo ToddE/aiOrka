@@ -9,7 +9,8 @@ interface ProviderAdapter {
         providerId: String,
         provider: ProviderConfig,
         messages: List<Message>,
-        apiKey: String?
+        apiKey: String?,
+        resolvedHeaders: Map<String, String> = emptyMap()
     ): OrkaResponse
 
     fun supportsProvider(type: String): Boolean

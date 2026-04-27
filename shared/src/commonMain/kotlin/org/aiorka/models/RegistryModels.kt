@@ -79,7 +79,8 @@ data class ProviderConfig(
     val endpoint: String? = null,
     @SerialName("api_key_env") val apiKeyEnv: String? = null,
     val description: String? = null,
-    val config: Map<String, String> = emptyMap()
+    val config: Map<String, String> = emptyMap(),
+    @SerialName("headers_env") val headersEnv: Map<String, String> = emptyMap()
 )
 
 @Serializable

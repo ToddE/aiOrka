@@ -45,7 +45,7 @@ fn load_config(env: &HashMap<String, String>) -> String {
     for path in &candidates {
         if let Ok(content) = fs::read_to_string(path) {
             let endpoint = env
-                .get("OLLAMA_ENDPOINT")
+                .get("SELFHOSTED_ENDPOINT")
                 .map(String::as_str)
                 .unwrap_or("http://localhost:11434");
             return content.replace("http://localhost:11434", endpoint);
@@ -62,7 +62,7 @@ fn active_keys(env: &HashMap<String, String>) -> String {
         .map(|p| p.to_lowercase())
         .collect();
     if found.is_empty() {
-        "none (local Ollama only)".into()
+        "none (self-hosted only)".into()
     } else {
         found.join(", ")
     }
@@ -190,7 +190,7 @@ fn main() {
     println!("Config  : examples/aiOrka.yaml");
     println!(
         "Endpoint: {}",
-        env.get("OLLAMA_ENDPOINT").map(String::as_str).unwrap_or("http://localhost:11434")
+        env.get("SELFHOSTED_ENDPOINT").map(String::as_str).unwrap_or("http://localhost:11434")
     );
     println!("Keys    : {}\n", active_keys(&env));
 

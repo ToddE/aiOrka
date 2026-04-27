@@ -46,7 +46,7 @@ def load_config(root: Path, env: dict[str, str]) -> str:
     if not config_path.exists():
         sys.exit(f"Cannot find {config_path} — run from the repo root")
     yaml = config_path.read_text()
-    endpoint = env.get("OLLAMA_ENDPOINT", "http://localhost:11434")
+    endpoint = env.get("SELFHOSTED_ENDPOINT", "http://localhost:11434")
     return yaml.replace("http://localhost:11434", endpoint)
 
 
@@ -60,7 +60,7 @@ def banner(title: str) -> str:
 def active_keys(env: dict[str, str]) -> str:
     providers = ["ANTHROPIC", "OPENAI", "GEMINI", "DEEPSEEK"]
     found = [p.lower() for p in providers if env.get(f"{p}_API_KEY", "").strip()]
-    return ", ".join(found) if found else "none (local Ollama only)"
+    return ", ".join(found) if found else "none (self-hosted only)"
 
 
 # ── Test runner ───────────────────────────────────────────────────────────────
@@ -183,7 +183,7 @@ def main() -> None:
 
     print(f"Library : aiorka {__version__()}")
     print(f"Config  : {root / 'examples' / 'aiOrka.yaml'}")
-    print(f"Endpoint: {env.get('OLLAMA_ENDPOINT', 'http://localhost:11434')}")
+    print(f"Endpoint: {env.get('SELFHOSTED_ENDPOINT', 'http://localhost:11434')}")
     print(f"Keys    : {active_keys(env)}\n")
 
     with AiOrka(config_yaml=config_yaml) as orka:

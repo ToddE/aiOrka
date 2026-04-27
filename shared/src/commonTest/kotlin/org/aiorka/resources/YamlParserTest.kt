@@ -175,7 +175,7 @@ class YamlParserTest {
         val yaml = """
             providers:
               local-qwen:
-                type: "ollama"
+                type: "selfhosted"
                 model_ref: "qwen3.5:9b"
                 endpoint: "http://localhost:11434"
                 config:
@@ -189,7 +189,7 @@ class YamlParserTest {
         val config = YamlParser.parseAppConfig(yaml)
         val ollama = config.providers["local-qwen"]
         assertNotNull(ollama)
-        assertEquals("ollama", ollama.type)
+        assertEquals("selfhosted", ollama.type)
         assertEquals("qwen3.5:9b", ollama.modelRef)
         assertEquals("32768", ollama.config["num_ctx"])
 
